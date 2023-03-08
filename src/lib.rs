@@ -16,7 +16,7 @@ use {
     ruc::*,
     serde::{Deserialize, Deserializer, Serialize, Serializer},
     std::{fs, marker::PhantomData, path::PathBuf, result::Result as StdResult},
-    zei::xfr::sig::{XfrKeyPair, XfrPublicKey, XfrSignature},
+    zei::{XfrKeyPair, XfrPublicKey, XfrSignature},
 };
 
 /// Perform a synchronize http get request with attohttpc,
@@ -387,7 +387,7 @@ where
     #[inline(always)]
     pub fn new(xfr: &XfrKeyPair, to_sign: &T) -> Self {
         Self {
-            sig: xfr.get_sk_ref().sign(to_sign.as_ref(), xfr.get_pk_ref()),
+            sig: xfr.get_sk_ref().sign(to_sign.as_ref()).unwrap(),
             phantom: PhantomData,
         }
     }
