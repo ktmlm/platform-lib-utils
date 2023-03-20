@@ -8,10 +8,7 @@ use {
     bech32::{self, FromBase32, ToBase32},
     bip0039::{Count, Language, Mnemonic},
     ed25519_dalek_bip32::{DerivationPath, ExtendedSecretKey},
-    noah::anon_xfr::{
-        keys::{AXfrKeyPair, AXfrPubKey},
-        structs::{Commitment, Nullifier},
-    },
+    noah::anon_xfr::structs::{Commitment, Nullifier},
     noah_algebra::serialization::NoahFromToBytes,
     noah_crypto::basic::hybrid_encryption::{XPublicKey, XSecretKey},
     ruc::*,
@@ -220,20 +217,6 @@ pub fn public_key_from_base64(pk: &str) -> Result<XfrPublicKey> {
 }
 
 #[inline(always)]
-/// Restore a anon public key from base64
-pub fn anon_public_key_from_base64(pk: &str) -> Result<AXfrPubKey> {
-    base64::decode_config(pk, base64::URL_SAFE)
-        .c(d!())
-        .and_then(|bytes| AXfrPubKey::noah_from_bytes(&bytes).c(d!()))
-}
-
-#[inline(always)]
-/// Convert an anon public key to base64
-pub fn anon_public_key_to_base64(key: &AXfrPubKey) -> String {
-    base64::encode_config(AXfrPubKey::noah_to_bytes(key), base64::URL_SAFE)
-}
-
-#[inline(always)]
 /// Restore a x public key from base64
 pub fn x_public_key_from_base64(pk: &str) -> Result<XPublicKey> {
     base64::decode_config(pk, base64::URL_SAFE)
@@ -245,20 +228,6 @@ pub fn x_public_key_from_base64(pk: &str) -> Result<XPublicKey> {
 /// Convert a x public key to base64
 pub fn x_public_key_to_base64(key: &XPublicKey) -> String {
     base64::encode_config(XPublicKey::noah_to_bytes(key), base64::URL_SAFE)
-}
-
-#[inline(always)]
-/// Restore a anon secret key from base64
-pub fn anon_secret_key_from_base64(sk: &str) -> Result<AXfrKeyPair> {
-    base64::decode_config(sk, base64::URL_SAFE)
-        .c(d!())
-        .and_then(|bytes| AXfrKeyPair::noah_from_bytes(&bytes).c(d!()))
-}
-
-#[inline(always)]
-/// Convert an anon secret key to base64
-pub fn anon_secret_key_to_base64(key: &AXfrKeyPair) -> String {
-    base64::encode_config(AXfrKeyPair::noah_to_bytes(key), base64::URL_SAFE)
 }
 
 #[inline(always)]

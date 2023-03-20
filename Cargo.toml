@@ -14,10 +14,10 @@ rand = "0.8"
 hex = "0.4.2"
 bip32 = "0.3.0"
 
-cryptohash = { git = "https://github.com/shaorongqiang/platform-lib-cryptohash", branch = "main" }
-noah  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.3.2" }
-noah-crypto  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.3.2" }
-noah-algebra  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.3.2" }
+cryptohash = { git = "https://github.com/FindoraNetwork/platform-lib-cryptohash", branch = "main" }
+noah  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.3" }
+noah-crypto  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.3" }
+noah-algebra  = { git = "https://github.com/FindoraNetwork/noah", tag = "v0.4.3" }
 
 base64 = "0.13"
 bip0039 = { git = "https://github.com/FindoraNetwork/bip0039", branch = "fix_extra_whitespace", features = ["chinese-simplified", "chinese-traditional", "french", "italian", "korean", "spanish", "japanese"] }
