@@ -8,11 +8,11 @@ use {
     bech32::{self, FromBase32, ToBase32},
     bip0039::{Count, Language, Mnemonic},
     ed25519_dalek_bip32::{DerivationPath, ExtendedSecretKey},
+    noah::anon_xfr::structs::{Commitment, Nullifier},
+    noah_algebra::serialization::NoahFromToBytes,
+    noah_crypto::basic::hybrid_encryption::{XPublicKey, XSecretKey},
     ruc::*,
-    zei::{
-        serialization::ZeiFromToBytes,
-        xfr::sig::{XfrKeyPair, XfrPublicKey, XfrSecretKey},
-    },
+    zei::{XfrKeyPair, XfrPublicKey, XfrSecretKey},
 };
 
 /// Randomly generate a 12words-length mnemonic.
@@ -63,8 +63,7 @@ macro_rules! restore_keypair_from_mnemonic {
                     .map_err(|e| eg!(e))
             })
             .and_then(|kp| {
-                XfrSecretKey::zei_from_bytes(&kp.secret_key.to_bytes()[..])
-                    .map_err(|e| eg!(e))
+                XfrSecretKey::noah_from_bytes(&kp.secret_key.to_bytes()[..]).map_err(|e| eg!(e))
             })
             .map(|sk| sk.into_keypair())
     };
@@ -92,12 +91,37 @@ impl BipPath {
 }
 
 /// Restore the XfrKeyPair from a mnemonic with a default bip44-path,
-/// that is "m/44'/917'/0'/0/0" ("m/44'/coin'/account'/change/address").
+/// that is "m/44'/60'/0'/0/0" ("m/44'/coin'/account'/change/address").
 #[inline(always)]
 pub fn restore_keypair_from_mnemonic_default(phrase: &str) -> Result<XfrKeyPair> {
+    restore_keypair_from_mnemonic_ed25519(phrase)
+}
+
+/// Restore the XfrKeyPair from a mnemonic with a default bip44-path,
+/// that is "m/44'/60'/0'/0/0" ("m/44'/coin'/account'/change/address").
+#[inline(always)]
+pub fn restore_keypair_from_mnemonic_cus(
+    phrase: &str,
+    account: u32,
+    change: u32,
+    address: u32,
+) -> Result<XfrKeyPair> {
     const FRA: u32 = 917;
-    restore_keypair_from_mnemonic!(phrase, "en", BipPath::new(FRA, 0, 0, 0), bip44)
-        .c(d!())
+    restore_keypair_from_mnemonic!(
+        phrase,
+        "en",
+        BipPath::new(FRA, account, change, address),
+        bip44
+    )
+    .c(d!())
+}
+
+/// Restore the ed25519 XfrKeyPair from a mnemonic with a default bip44-path,
+/// that is "m/44'/917'/0'/0/0" ("m/44'/coin'/account'/change/address").
+#[inline(always)]
+pub fn restore_keypair_from_mnemonic_ed25519(phrase: &str) -> Result<XfrKeyPair> {
+    const FRA: u32 = 917;
+    restore_keypair_from_mnemonic!(phrase, "en", BipPath::new(FRA, 0, 0, 0), bip44).c(d!())
 }
 
 /// Restore the XfrKeyPair from secret key,
@@ -106,7 +130,7 @@ pub fn restore_keypair_from_seckey_base64(sec: &str) -> Result<XfrKeyPair> {
     base64::decode_config(sec, base64::URL_SAFE)
         .c(d!())
         .and_then(|sec| {
-            XfrSecretKey::zei_from_bytes(&sec)
+            XfrSecretKey::noah_from_bytes(&sec)
                 .c(d!())
                 .map(|sec| sec.into_keypair())
         })
@@ -173,7 +197,15 @@ fn check_lang(lang: &str) -> Result<Language> {
 /// Convert a XfrPublicKey to base64 human-readable address
 #[inline(always)]
 pub fn public_key_to_base64(key: &XfrPublicKey) -> String {
-    base64::encode_config(ZeiFromToBytes::zei_to_bytes(key), base64::URL_SAFE)
+    base64::encode_config(NoahFromToBytes::noah_to_bytes(key), base64::URL_SAFE)
+}
+
+/// Convert publickey to hex.
+#[inline(always)]
+pub fn public_key_to_hex(key: &XfrPublicKey) -> String {
+    let s = hex::encode(NoahFromToBytes::noah_to_bytes(key));
+
+    String::from("0x") + &s
 }
 
 /// Restore a XfrPublicKey from base64 human-readable address
@@ -181,13 +213,72 @@ pub fn public_key_to_base64(key: &XfrPublicKey) -> String {
 pub fn public_key_from_base64(pk: &str) -> Result<XfrPublicKey> {
     base64::decode_config(pk, base64::URL_SAFE)
         .c(d!())
-        .and_then(|bytes| XfrPublicKey::zei_from_bytes(&bytes).c(d!()))
+        .and_then(|bytes| XfrPublicKey::noah_from_bytes(&bytes).c(d!()))
+}
+
+#[inline(always)]
+/// Restore a x public key from base64
+pub fn x_public_key_from_base64(pk: &str) -> Result<XPublicKey> {
+    base64::decode_config(pk, base64::URL_SAFE)
+        .c(d!())
+        .and_then(|bytes| XPublicKey::noah_from_bytes(&bytes).c(d!()))
+}
+
+#[inline(always)]
+/// Convert a x public key to base64
+pub fn x_public_key_to_base64(key: &XPublicKey) -> String {
+    base64::encode_config(XPublicKey::noah_to_bytes(key), base64::URL_SAFE)
+}
+
+#[inline(always)]
+/// Restore a x secret key from base64
+pub fn x_secret_key_from_base64(sk: &str) -> Result<XSecretKey> {
+    base64::decode_config(sk, base64::URL_SAFE)
+        .c(d!())
+        .and_then(|bytes| XSecretKey::noah_from_bytes(&bytes).c(d!()))
+}
+
+#[inline(always)]
+/// Convert an anon public key to base64
+pub fn x_secret_key_to_base64(key: &XSecretKey) -> String {
+    base64::encode_config(XSecretKey::noah_to_bytes(key), base64::URL_SAFE)
+}
+
+#[inline(always)]
+/// Restore a Commitment from base64
+pub fn commitment_from_base58(com: &str) -> Result<Commitment> {
+    bs58::decode(com)
+        .into_vec()
+        .c(d!())
+        .and_then(|bytes| Commitment::noah_from_bytes(&bytes).c(d!()))
+}
+
+#[inline(always)]
+/// Convert a Commitment to base64
+pub fn commitment_to_base58(com: &Commitment) -> String {
+    bs58::encode(&Commitment::noah_to_bytes(com)).into_string()
+}
+
+#[inline(always)]
+/// Restore a Commitment from base58
+pub fn nullifier_from_base58(com: &str) -> Result<Nullifier> {
+    bs58::decode(com)
+        .into_vec()
+        .c(d!())
+        .and_then(|bytes| Nullifier::noah_from_bytes(&bytes).c(d!()))
+}
+
+#[inline(always)]
+/// Convert a Nullifier to base58
+pub fn nullifier_to_base58(n: &Nullifier) -> String {
+    bs58::encode(&Nullifier::noah_to_bytes(n)).into_string()
 }
 
 /// Convert a XfrPublicKey to bech32 human-readable address
 #[inline(always)]
 pub fn public_key_to_bech32(key: &XfrPublicKey) -> String {
-    bech32enc(&XfrPublicKey::zei_to_bytes(key))
+    let bytes = &XfrPublicKey::noah_to_bytes(key);
+    bech32enc_fra(<&[u8; 32]>::try_from(&bytes[0..32]).unwrap())
 }
 
 /// Restore a XfrPublicKey to bech32 human-readable address
@@ -195,11 +286,11 @@ pub fn public_key_to_bech32(key: &XfrPublicKey) -> String {
 pub fn public_key_from_bech32(addr: &str) -> Result<XfrPublicKey> {
     bech32dec(addr)
         .c(d!())
-        .and_then(|bytes| XfrPublicKey::zei_from_bytes(&bytes).c(d!()))
+        .and_then(|bytes| XfrPublicKey::noah_from_bytes(&bytes).c(d!()))
 }
 
 #[inline(always)]
-fn bech32enc<T: AsRef<[u8]> + ToBase32>(input: &T) -> String {
+fn bech32enc_fra<T: AsRef<[u8]> + ToBase32>(input: &T) -> String {
     bech32::encode("fra", input.to_base32()).unwrap()
 }
 

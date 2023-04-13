@@ -3,8 +3,8 @@
 //!
 
 use {
-    std::env, std::io, tracing_subscriber::filter::LevelFilter,
-    tracing_subscriber::EnvFilter,
+    std::{env, io},
+    tracing_subscriber::{filter::LevelFilter, EnvFilter},
 };
 
 #[allow(missing_docs)]
@@ -15,8 +15,7 @@ pub fn init_logging(verbose: Option<&str>) {
         if module.is_empty() {
             env_filter = env_filter.add_directive(LevelFilter::DEBUG.into());
         } else {
-            env_filter =
-                env_filter.add_directive(format!("{module}=debug").parse().unwrap());
+            env_filter = env_filter.add_directive(format!("{module}=debug").parse().unwrap());
         }
     }
 
