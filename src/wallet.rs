@@ -8,11 +8,11 @@ use {
     bech32::{self, FromBase32, ToBase32},
     bip0039::{Count, Language, Mnemonic},
     ed25519_dalek_bip32::{DerivationPath, ExtendedSecretKey},
-    noah::anon_xfr::structs::{Commitment, Nullifier},
-    noah_algebra::serialization::NoahFromToBytes,
-    noah_crypto::basic::hybrid_encryption::{XPublicKey, XSecretKey},
+    platform_lib_noah::noah_algebra::serialization::NoahFromToBytes,
+    platform_lib_noah::noah_api::anon_xfr::structs::{Commitment, Nullifier},
+    platform_lib_noah::noah_crypto::basic::hybrid_encryption::{XPublicKey, XSecretKey},
+    platform_lib_noah::{XfrKeyPair, XfrPublicKey, XfrSecretKey},
     ruc::*,
-    zei::{XfrKeyPair, XfrPublicKey, XfrSecretKey},
 };
 
 /// Randomly generate a 12words-length mnemonic.

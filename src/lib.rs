@@ -13,10 +13,10 @@ use {
         sha256::{self, Digest},
         Proof,
     },
+    platform_lib_noah::{XfrKeyPair, XfrPublicKey, XfrSignature},
     ruc::*,
     serde::{Deserialize, Deserializer, Serialize, Serializer},
     std::{fs, marker::PhantomData, path::PathBuf, result::Result as StdResult},
-    zei::{XfrKeyPair, XfrPublicKey, XfrSignature},
 };
 
 /// Perform a synchronize http get request with attohttpc,
