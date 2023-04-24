@@ -14,7 +14,7 @@ rand = "0.8"
 hex = "0.4.2"
 bip32 = "0.3.0"
 
-cryptohash = { git = "https://github.com/FindoraNetwork/platform-lib-cryptohash", branch = "develop" }
+cryptohash = { git = "https://github.com/FindoraNetwork/platform-lib-cryptohash", branch = "tmp-1" }
 
 base64 = "0.13"
 bip0039 = { git = "https://github.com/FindoraNetwork/bip0039", branch = "fix_extra_whitespace", features = ["chinese-simplified", "chinese-traditional", "french", "italian", "korean", "spanish", "japanese"] }
@@ -23,7 +23,7 @@ ed25519-dalek-bip32 = { git = "https://github.com/FindoraNetwork/ed25519-dalek-b
 tracing = "0.1.13"
 tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
 bs58 = "0.4"
-platform-lib-noah = { git = "https://github.com/FindoraNetwork/platform-lib-noah", branch = "develop" }
+platform-lib-noah = { git = "https://github.com/FindoraNetwork/platform-lib-noah", branch = "tmp-1" }
 
 [dev-dependencies]
 rand_chacha = "0.3"
