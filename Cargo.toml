@@ -13,7 +13,7 @@ time = "0.3"
 rand = "0.8"
 hex = "0.4.2"
 
-cryptohash = { git = "https://github.com/FindoraNetwork/platform-lib-cryptohash", branch = "main" }
+cryptohash = { git = "https://github.com/FindoraNetwork/platform-lib-cryptohash", tag = "v1.0.0" }
 zei = { git = "https://github.com/FindoraNetwork/zei", branch = "stable-main" }
 
 base64 = "0.12"
