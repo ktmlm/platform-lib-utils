@@ -10,7 +10,7 @@ use {
     ed25519_dalek_bip32::{DerivationPath, ExtendedSecretKey},
     platform_lib_noah::noah_algebra::serialization::NoahFromToBytes,
     platform_lib_noah::noah_api::anon_xfr::structs::{Commitment, Nullifier},
-    platform_lib_noah::noah_crypto::basic::hybrid_encryption::{XPublicKey, XSecretKey},
+    platform_lib_noah::noah_crypto::hybrid_encryption::{XPublicKey, XSecretKey},
     platform_lib_noah::{XfrKeyPair, XfrPublicKey, XfrSecretKey},
     ruc::*,
 };
