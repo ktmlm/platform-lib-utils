@@ -312,7 +312,13 @@ pub fn nullifier_to_base58(n: &Nullifier) -> String {
 #[inline(always)]
 pub fn public_key_to_bech32(key: &XfrPublicKey) -> String {
     let bytes = &XfrPublicKey::noah_to_bytes(key);
-    bech32enc_fra(<&[u8; 32]>::try_from(&bytes[0..32]).unwrap())
+    if key.is_ed25519() {
+        bech32enc_fra(<&[u8; 32]>::try_from(&bytes[0..32]).unwrap())
+    } else if key.is_secp256k1() {
+        bech32enc_eth(bytes.into())
+    } else {
+        String::new()
+    }
 }
 
 /// Restore a XfrPublicKey to bech32 human-readable address
@@ -326,6 +332,11 @@ pub fn public_key_from_bech32(addr: &str) -> Result<XfrPublicKey> {
 #[inline(always)]
 fn bech32enc_fra<T: AsRef<[u8]> + ToBase32>(input: &T) -> String {
     bech32::encode("fra", input.to_base32()).unwrap()
+}
+
+#[inline(always)]
+fn bech32enc_eth<T: AsRef<[u8]> + ToBase32>(input: &T) -> String {
+    bech32::encode("eth", input.to_base32()).unwrap()
 }
 
 #[inline(always)]
@@ -377,10 +388,15 @@ mod test {
                 pnk!(restore_keypair_from_mnemonic_ed25519(&phrase));
                 let l = restore_keypair_from_mnemonic_ed25519(&phrase).unwrap();
                 assert_eq!(l.get_sk().to_bytes().len(), 32);
+                let mut p = public_key_to_bech32(l.get_pk_ref());
+                assert!(public_key_from_bech32(p.as_str()).unwrap().is_ed25519());
 
                 pnk!(restore_keypair_from_mnemonic_secp256k1(&phrase));
                 let k = restore_keypair_from_mnemonic_secp256k1(&phrase).unwrap();
                 assert_eq!(k.get_sk().to_bytes().len(), 33);
+                p = public_key_to_bech32(k.get_pk_ref());
+                assert!(public_key_from_bech32(p.as_str()).unwrap().is_secp256k1());
+
             })
         });
     }
