@@ -69,6 +69,31 @@ macro_rules! restore_keypair_from_mnemonic {
     };
 }
 
+macro_rules! restore_keypair_from_mnemonic_secp265k1 {
+    ($phrase: expr, $l: expr, $p: expr, $bip: tt) => {
+        check_lang($l)
+            .c(d!())
+            .and_then(|l| Mnemonic::from_phrase_in(l, $phrase).map_err(|e| eg!(e)))
+            .map(|m| m.to_seed(""))
+            .and_then(|seed| {
+                DerivationPath::$bip($p.coin, $p.account, $p.change, $p.address)
+                    .map_err(|e| eg!(e))
+                    .map(|dp| (seed, dp))
+            })
+            .and_then(|(seed, dp)| {
+                ExtendedSecretKey::from_seed(&seed)
+                    .map_err(|e| eg!(e))?
+                    .derive(&dp)
+                    .map_err(|e| eg!(e))
+            })
+            .and_then(|kp| {
+                XfrSecretKey::noah_from_bytes(&[&[1u8], &kp.secret_key.to_bytes()[..]].concat())
+                    .map_err(|e| eg!(e))
+            })
+            .map(|sk| sk.into_keypair())
+    };
+}
+
 /// Use this struct to express a Bip44/Bip49 path.
 pub struct BipPath {
     coin: u32,
@@ -122,6 +147,15 @@ pub fn restore_keypair_from_mnemonic_cus(
 pub fn restore_keypair_from_mnemonic_ed25519(phrase: &str) -> Result<XfrKeyPair> {
     const FRA: u32 = 917;
     restore_keypair_from_mnemonic!(phrase, "en", BipPath::new(FRA, 0, 0, 0), bip44).c(d!())
+}
+
+/// Restore the secp256k1 XfrKeyPair from a mnemonic with a default bip44-path,
+/// that is "m/44'/917'/0'/0/0" ("m/44'/coin'/account'/change/address").
+#[inline(always)]
+pub fn restore_keypair_from_mnemonic_secp256k1(phrase: &str) -> Result<XfrKeyPair> {
+    const ETH: u32 = 60;
+    restore_keypair_from_mnemonic_secp265k1!(phrase, "en", BipPath::new(ETH, 0, 0, 0), bip44)
+        .c(d!())
 }
 
 /// Restore the XfrKeyPair from secret key,
@@ -331,6 +365,24 @@ mod test {
                     ));
                 })
             });
+    }
+
+    #[test]
+    fn t_generate_mnemonic_2() {
+        ["en"].iter().for_each(|lang| {
+            [12, 15, 18, 21, 24].iter().for_each(|wordslen| {
+                let phrase = generate_mnemonic_custom(*wordslen, lang).unwrap();
+                assert_eq!(*wordslen as usize, phrase.split(' ').count());
+
+                pnk!(restore_keypair_from_mnemonic_ed25519(&phrase));
+                let l = restore_keypair_from_mnemonic_ed25519(&phrase).unwrap();
+                assert_eq!(l.get_sk().to_bytes().len(), 32);
+
+                pnk!(restore_keypair_from_mnemonic_secp256k1(&phrase));
+                let k = restore_keypair_from_mnemonic_secp256k1(&phrase).unwrap();
+                assert_eq!(k.get_sk().to_bytes().len(), 33);
+            })
+        });
     }
 
     #[test]
