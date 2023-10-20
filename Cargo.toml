@@ -23,7 +23,7 @@ ed25519-dalek-bip32 = { git = "https://github.com/FindoraNetwork/ed25519-dalek-b
 tracing = "0.1.13"
 tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
 bs58 = "0.4"
-platform-lib-noah = { git = "https://github.com/FindoraNetwork/platform-lib-noah", branch = "develop" }
+platform-lib-noah = { git = "https://github.com/FindoraNetwork/platform-lib-noah", branch = "main" }
 
 [dev-dependencies]
 rand_chacha = "0.3"
