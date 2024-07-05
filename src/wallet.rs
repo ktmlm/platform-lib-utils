@@ -200,7 +200,7 @@ pub fn public_key_from_bech32(addr: &str) -> Result<XfrPublicKey> {
 
 #[inline(always)]
 fn bech32enc<T: AsRef<[u8]> + ToBase32>(input: &T) -> String {
-    bech32::encode("fra", input.to_base32()).unwrap()
+    bech32::encode("zkk", input.to_base32()).unwrap()
 }
 
 #[inline(always)]
